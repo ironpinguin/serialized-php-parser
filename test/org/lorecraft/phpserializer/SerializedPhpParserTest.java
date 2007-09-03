@@ -1,15 +1,17 @@
 package org.lorecraft.phpserializer;
 import java.util.Map;
 
+import org.lorecraft.phparser.SerializedPhpParser;
+
 import junit.framework.TestCase;
 
-public class PhpParserTest extends TestCase {
+public class SerializedPhpParserTest extends TestCase {
 
 	public void testParseNull() throws Exception {
 		String input = "N;";
-		PhpParser phpParser = new PhpParser(input);
-		Object result = phpParser.parse();
-		assertEquals(PhpParser.NULL, result);
+		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
+		Object result = serializedPhpParser.parse();
+		assertEquals(SerializedPhpParser.NULL, result);
 	}
 
 	public void testParseInteger() throws Exception {
@@ -30,8 +32,8 @@ public class PhpParserTest extends TestCase {
 
 	public void testParseArray() throws Exception {
 		String input = "a:1:{i:1;i:2;}";
-		PhpParser phpParser = new PhpParser(input);
-		Object result = phpParser.parse();
+		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
+		Object result = serializedPhpParser.parse();
 		assertTrue(result instanceof Map);
 		assertEquals(1, ((Map)result).size());
 		assertEquals(2, ((Map)result).get(1));
@@ -39,21 +41,21 @@ public class PhpParserTest extends TestCase {
 
 	public void testParseObject() throws Exception {
 		String input = "O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}";
-		PhpParser phpParser = new PhpParser(input);
-		Object result = phpParser.parse();
-		assertTrue(result instanceof PhpParser.PhpObject);
-		assertEquals(1, ((PhpParser.PhpObject)result).attributes.size());
-		assertEquals("test", ((PhpParser.PhpObject)result).attributes.get("pippo"));
+		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
+		Object result = serializedPhpParser.parse();
+		assertTrue(result instanceof SerializedPhpParser.PhpObject);
+		assertEquals(1, ((SerializedPhpParser.PhpObject)result).attributes.size());
+		assertEquals("test", ((SerializedPhpParser.PhpObject)result).attributes.get("pippo"));
 
 	}
 
 	public void testParseComplexDataStructure() throws Exception {
 		String input = "a:2:{i:0;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";Œ—TÀR—≈TÃ‘Ò¡L\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}i:1;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";Œ—TÀR—≈TÃ‘Ò¡L\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}}";
-		Object result = new PhpParser(input).parse();
+		Object result = new SerializedPhpParser(input).parse();
 	}
 
 	private void assertPrimitive(String input, Object expected) {
-		assertEquals(expected, new PhpParser(input).parse());
+		assertEquals(expected, new SerializedPhpParser(input).parse());
 	}
 
 
