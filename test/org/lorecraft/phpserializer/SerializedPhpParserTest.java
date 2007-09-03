@@ -40,12 +40,12 @@ public class SerializedPhpParserTest extends TestCase {
 	}
 
 	public void testParseObject() throws Exception {
-		String input = "O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}";
+		String input = "O:8:\"TypeName\":1:{s:3:\"foo\";s:3:\"bar\";}";
 		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
 		Object result = serializedPhpParser.parse();
 		assertTrue(result instanceof SerializedPhpParser.PhpObject);
 		assertEquals(1, ((SerializedPhpParser.PhpObject)result).attributes.size());
-		assertEquals("test", ((SerializedPhpParser.PhpObject)result).attributes.get("pippo"));
+		assertEquals("bar", ((SerializedPhpParser.PhpObject)result).attributes.get("foo"));
 
 	}
 

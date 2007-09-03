@@ -28,8 +28,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Deserializes a serialized PHP data structure into corresponding Java objects
+ * Deserializes a serialized PHP data structure into corresponding Java objects. It supports
+ * the integer, float, boolean, string primitives that are mapped to their Java
+ * equivalent, plus arrays that are parsed into <code>Map</code> instances and objects
+ * that are represented by {@link SerializedPhpParser.PhpObject} instances.
+ * <p>
+ * Example of use:
+ * <pre>
+ * 		String input = "O:8:\"TypeName\":1:{s:3:\"foo\";s:3:\"bar\";}";
+ * 		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
+ *		Object result = serializedPhpParser.parse();
+ * </pre>
  *
+ * The <code>result</code> object will be a <code>PhpObject</code> with the name "TypeName" and
+ * the attribute "foo" = "bar".
  */
 public class SerializedPhpParser {
 
