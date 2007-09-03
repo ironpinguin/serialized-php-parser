@@ -35,7 +35,7 @@ import java.util.Map;
  * <p>
  * Example of use:
  * <pre>
- * 		String input = "O:8:\"TypeName\":1:{s:3:\"foo\";s:3:\"bar\";}";
+ * 		String input = "O:8:"TypeName":1:{s:3:"foo";s:3:"bar";}";
  * 		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
  *		Object result = serializedPhpParser.parse();
  * </pre>
