@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Deserializes a serialized PHP data structure into corresponding Java objects
+ *
+ */
 public class SerializedPhpParser {
 
 	private final String input;
