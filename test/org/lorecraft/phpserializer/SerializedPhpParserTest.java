@@ -95,6 +95,7 @@ public class SerializedPhpParserTest extends TestCase {
 				"s:8:\"comments\";N;s:10:\"uploadDate\";i:1196339460;s:15:\"itemCaptureDate\";i:1196339460;s:8:\"exifData\";N;s:5:\"owner\";" +
 				"s:20:\"1156837966_352721747\";s:11:\"extraFields\";a:1:{s:11:\"Description\";s:0:\"\";}s:4:\"rank\";N;s:7:\"version\";i:37;s:7:\"emailMe\";N;}}";
 		Map results = (Map)new SerializedPhpParser(input, false).parse();
+		assertTrue(results.toString().indexOf("supérb") > 0);
 	}
 
 }
