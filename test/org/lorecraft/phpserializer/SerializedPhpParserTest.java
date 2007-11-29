@@ -79,7 +79,7 @@ public class SerializedPhpParserTest extends TestCase {
 		assertEquals(expected, new SerializedPhpParser(input).parse());
 	}
 	
-	public void xtestParseStructureWithSpecialChars() throws Exception {
+	public void testParseStructureWithSpecialChars() throws Exception {
 		String input = "a:1:{i:0;O:9:\"albumitem\":19:{s:5:\"image\";O:5:\"image\":12:{s:4:\"name\";" +
 				"s:26:\"top_story_promo_transition\";s:4:\"type\";s:3:\"png\";s:5:\"width\";i:640;" +
 				"s:6:\"height\";i:212;s:11:\"resizedName\";s:32:\"top_story_promo_transition.sized\";" +
@@ -94,7 +94,7 @@ public class SerializedPhpParserTest extends TestCase {
 				"i:150;s:10:\"raw_height\";i:50;s:7:\"version\";i:37;}s:11:\"isAlbumName\";N;s:6:\"clicks\";N;s:8:\"keywords\";s:0:\"\";" +
 				"s:8:\"comments\";N;s:10:\"uploadDate\";i:1196339460;s:15:\"itemCaptureDate\";i:1196339460;s:8:\"exifData\";N;s:5:\"owner\";" +
 				"s:20:\"1156837966_352721747\";s:11:\"extraFields\";a:1:{s:11:\"Description\";s:0:\"\";}s:4:\"rank\";N;s:7:\"version\";i:37;s:7:\"emailMe\";N;}}";
-		Map results = (Map)new SerializedPhpParser(input).parse();
+		Map results = (Map)new SerializedPhpParser(input, false).parse();
 	}
 
 }

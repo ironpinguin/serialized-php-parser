@@ -49,8 +49,15 @@ public class SerializedPhpParser {
 
 	private int index;
 
+	private boolean assumeUTF8 = true;
+
 	public SerializedPhpParser(String input) {
 		this.input = input;
+	}
+
+	public SerializedPhpParser(String input, boolean assumeUTF8) {
+		this.input = input;
+		this.assumeUTF8 = assumeUTF8;
 	}
 
 	public Object parse() {
@@ -129,12 +136,16 @@ public class SerializedPhpParser {
 		int byteCount = 0;
 		while (byteCount != strLen) {
 			char ch = input.charAt(index + utfStrLen++);
-			if ((ch >= 0x0001) && (ch <= 0x007F)) {
-				byteCount++;
-			} else if (byteCount > 0x07FF) {
-				byteCount += 3;
+			if (assumeUTF8) {
+				if ((ch >= 0x0001) && (ch <= 0x007F)) {
+					byteCount++;
+				} else if (ch > 0x07FF) {
+					byteCount += 3;
+				} else {
+					byteCount += 2;
+				}
 			} else {
-				byteCount += 2;
+				byteCount++;
 			}
 		}
 		String value = input.substring(index, index + utfStrLen);
