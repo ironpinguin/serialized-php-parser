@@ -26,6 +26,7 @@ package org.lorecraft.phparser;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Deserializes a serialized PHP data structure into corresponding Java objects. It supports
@@ -51,6 +52,8 @@ public class SerializedPhpParser {
 
 	private boolean assumeUTF8 = true;
 
+	private Pattern acceptedAttributeNameRegex = null;
+	
 	public SerializedPhpParser(String input) {
 		this.input = input;
 	}
@@ -99,7 +102,9 @@ public class SerializedPhpParser {
 		for (int i = 0; i < attrLen; i++) {
 			Object key = parse();
 			Object value = parse();
-			phpObject.attributes.put(key, value);
+			if (isAcceptedAttribute(key)) {
+				phpObject.attributes.put(key, value);
+			}
 		}
 		index++;
 		return phpObject;
@@ -111,10 +116,22 @@ public class SerializedPhpParser {
 		for (int i = 0; i < arrayLen; i++) {
 			Object key = parse();
 			Object value = parse();
-			result.put(key, value);
+			if (isAcceptedAttribute(key)) {
+				result.put(key, value);
+			}
 		}
 		index++;
 		return result;
+	}
+
+	private boolean isAcceptedAttribute(Object key) {
+		if (acceptedAttributeNameRegex == null) {
+			return true;
+		}
+		if (!(key instanceof String)) {
+			return true;
+		}
+		return acceptedAttributeNameRegex.matcher((String)key).matches();
 	}
 
 	private int readLength() {
@@ -177,6 +194,10 @@ public class SerializedPhpParser {
 		String value = input.substring(index, delimiter);
 		index = delimiter + 1;
 		return Integer.valueOf(value);
+	}
+	
+	public void setAcceptedAttributeNameRegex(String acceptedAttributeNameRegex) {
+		this.acceptedAttributeNameRegex = Pattern.compile(acceptedAttributeNameRegex);
 	}
 
 	public static final Object NULL = new Object() {
