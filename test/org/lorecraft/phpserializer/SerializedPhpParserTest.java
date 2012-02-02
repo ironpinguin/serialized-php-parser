@@ -15,7 +15,7 @@ public class SerializedPhpParserTest extends TestCase {
 	}
 
 	public void testParseInteger() throws Exception {
-		assertPrimitive("i:123;", 123);
+		assertPrimitive("i:123;", 123L);
 	}
 
 	public void testParseFloat() throws Exception {
@@ -36,7 +36,7 @@ public class SerializedPhpParserTest extends TestCase {
 		Object result = serializedPhpParser.parse();
 		assertTrue(result instanceof Map);
 		assertEquals(1, ((Map)result).size());
-		assertEquals(2, ((Map)result).get(1));
+		assertEquals(2L, ((Map)result).get(1L));
 	}
 
 	public void testParseObject() throws Exception {
@@ -75,7 +75,7 @@ public class SerializedPhpParserTest extends TestCase {
 		assertEquals(2, ((Map)((Map)results.get("ResultSet")).get("Result")).size());
 	}
 
-	private void assertPrimitive(String input, Object expected) {
+	private void assertPrimitive(String input, Object expected) throws Exception {
 		assertEquals(expected, new SerializedPhpParser(input).parse());
 	}
 	
@@ -122,9 +122,63 @@ public class SerializedPhpParserTest extends TestCase {
 		serializedPhpParser.setAcceptedAttributeNameRegex("ResultSet|totalResultsReturned");
 		Object result = serializedPhpParser.parse();
 		// available
-		assertEquals(2, ((Map)((Map)result).get("ResultSet")).get("totalResultsReturned"));
+		assertEquals(2L, ((Map)((Map)result).get("ResultSet")).get("totalResultsReturned"));
 		// not available
 		assertNull(((Map)((Map)result).get("ResultSet")).get("totalResultsAvailable"));
 	}
+
+       public void testExceptionWrongArrayLength1() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       public void testExceptionWrongArrayLength2() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";i:2;i:22;i:3;d:21378;}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+
+       public void testExceptionWrongStringLength1() {
+               String input = "a:2:{i:1;s:8:\"Test Test!\";i:2;s:2:\"TT\";}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       public void testExceptionWrongStringLength2() {
+               String input = "a:2:{i:1;s:11:\"Test Test!\";i:2;s:2:\"TT\";}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       public void testExceptionMissingEndAfterString1() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";i:2;s:2:\"TT\"}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);            
+       }
+       
+       public void testExceptionMissingEndAfterString2() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";i:2;s:2:\"TT;}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       public void testExceptionMissingEndAfterInteger() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";i:2;i:21387481}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+
+       public void testExceptionMissingEndAfterDouble() {
+               String input = "a:2:{i:1;s:10:\"Test Test!\";i:2;d:21387481}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       public void testExceptionWrongObjectLength() {
+               String input = "O:9:\"TestClass\":2:{s:4:\"Var1\";i:10;}";
+               assertExceptionSimple("org.lorecraft.phparser.SerializedPhpParserException", input);
+       }
+       
+       private void assertExceptionSimple(String expectException, String input) {
+               try {
+                       Object result = new SerializedPhpParser(input).parse();
+                       fail("Expect a Exception! " + result.toString());
+               } catch (Exception ex) {
+                       assertEquals(expectException, ex.getClass().getName());
+               }
+       }
 
 }
