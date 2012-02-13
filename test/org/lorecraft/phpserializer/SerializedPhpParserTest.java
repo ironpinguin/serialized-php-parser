@@ -212,6 +212,13 @@ public class SerializedPhpParserTest extends TestCase
         "org.lorecraft.phparser.SerializedPhpParserException", input);
   }
 
+  public void testBugDefectStringWithSpezialChar()
+  {
+    String input = "s:4:\"";
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input);
+  }
+
   private void assertExceptionSimple(String expectException, String input)
   {
     try
