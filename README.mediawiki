@@ -1,5 +1,5 @@
-= Deserialize php serialized strings in java =
+# Deserialize php serialized strings in java
 
 This nice class deserialize a php serialized string in java.
 
-is original from [http://code.google.com/p/serialized-php-parser/]
+This is a fork from [Google Code Serialized Php Parser](http://code.google.com/p/serialized-php-parser/)
