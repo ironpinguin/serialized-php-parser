@@ -36,13 +36,13 @@ import java.util.regex.Pattern;
  * are represented by {@link SerializedPhpParser.PhpObject} instances.
  * <p>
  * Example of use:
- * 
+ *
  * <pre>
  * 		String input = "O:8:"TypeName":1:{s:3:"foo";s:3:"bar";}";
  * 		SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
  * 	Object result = serializedPhpParser.parse();
  * </pre>
- * 
+ *
  * The <code>result</code> object will be a <code>PhpObject</code>
  * with the name "TypeName" and the attribute "foo" = "bar".
  */
@@ -62,42 +62,42 @@ public class SerializedPhpParser
   public SerializedPhpParser(String input)
   {
     this.input = input;
-    this.inputLength = input.length();
+    inputLength = input.length();
   }
 
   public SerializedPhpParser(String input, boolean assumeUTF8)
   {
     this.input = input;
-    this.inputLength = input.length();
+    inputLength = input.length();
     this.assumeUTF8 = assumeUTF8;
   }
 
   public Object parse() throws SerializedPhpParserException
   {
-    checkUnexpectedLength(this.index + 2);
-    char type = this.input.charAt(this.index);
+    checkUnexpectedLength(index + 2);
+    char type = input.charAt(index);
     switch (type)
     {
     case 'i':
-      this.index += 2;
+      index += 2;
       return parseInt();
     case 'd':
-      this.index += 2;
+      index += 2;
       return parseFloat();
     case 'b':
-      this.index += 2;
+      index += 2;
       return parseBoolean();
     case 's':
-      this.index += 2;
+      index += 2;
       return parseString();
     case 'a':
-      this.index += 2;
+      index += 2;
       return parseArray();
     case 'O':
-      this.index += 2;
+      index += 2;
       return parseObject();
     case 'N':
-      this.index += 2;
+      index += 2;
       return NULL;
     default:
       throw new SerializedPhpParserException("Encountered unknown type ["
@@ -110,8 +110,8 @@ public class SerializedPhpParser
     PhpObject phpObject = new PhpObject();
     int strLen = readLength();
     checkUnexpectedLength(strLen);
-    phpObject.name = this.input.substring(this.index, this.index + strLen);
-    this.index = this.index + strLen + 2;
+    phpObject.name = input.substring(index, index + strLen);
+    index = index + strLen + 2;
     int attrLen = readLength();
     for (int i = 0; i < attrLen; i++)
     {
@@ -122,7 +122,7 @@ public class SerializedPhpParser
         phpObject.attributes.put(key, value);
       }
     }
-    this.index++;
+    index++;
     return phpObject;
   }
 
@@ -140,20 +140,20 @@ public class SerializedPhpParser
         result.put(key, value);
       }
     }
-    char endChar = this.input.charAt(this.index);
+    char endChar = input.charAt(index);
     if (endChar != '}')
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized Array, missing }!", this.index);
+          "Unexpected end of serialized Array, missing }!", index);
     }
 
-    this.index++;
+    index++;
     return result;
   }
 
   private boolean isAcceptedAttribute(Object key)
   {
-    if (this.acceptedAttributeNameRegex == null)
+    if (acceptedAttributeNameRegex == null)
     {
       return true;
     }
@@ -161,27 +161,27 @@ public class SerializedPhpParser
     {
       return true;
     }
-    return this.acceptedAttributeNameRegex.matcher((String) key).matches();
+    return acceptedAttributeNameRegex.matcher((String) key).matches();
   }
 
   private int readLength() throws SerializedPhpParserException
   {
-    int delimiter = this.input.indexOf(':', this.index);
+    int delimiter = input.indexOf(':', index);
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
           "Missing delimiter after string, array or object length field!",
-          this.index);
+          index);
     }
     checkUnexpectedLength(delimiter + 2);
-    int arrayLen = Integer.valueOf(this.input.substring(this.index, delimiter));
-    this.index = delimiter + 2;
+    int arrayLen = Integer.valueOf(input.substring(index, delimiter));
+    index = delimiter + 2;
     return arrayLen;
   }
 
   /**
    * Assumes strings are utf8 encoded
-   * 
+   *
    * @return
    */
   private String parseString() throws SerializedPhpParserException
@@ -194,17 +194,17 @@ public class SerializedPhpParser
     int nextCharIndex = 0;
     while (byteCount != strLen)
     {
-      nextCharIndex = this.index + utfStrLen++;
-      if (nextCharIndex >= this.inputLength)
+      nextCharIndex = index + utfStrLen++;
+      if (nextCharIndex >= inputLength)
       {
         throw new SerializedPhpParserException("Unexpected end of String ("
-            + strLen + ") at position " + (nextCharIndex - this.index)
+            + strLen + ") at position " + (nextCharIndex - index)
             + ", absolut position in Input String: " + nextCharIndex
             + ". The string: "
-            + this.input.substring(this.index, nextCharIndex), nextCharIndex);
+            + input.substring(index, nextCharIndex), nextCharIndex);
       }
-      char ch = this.input.charAt(nextCharIndex);
-      if (this.assumeUTF8)
+      char ch = input.charAt(nextCharIndex);
+      if (assumeUTF8)
       {
         if ((ch >= 0x0001) && (ch <= 0x007F))
         {
@@ -224,28 +224,34 @@ public class SerializedPhpParser
         byteCount++;
       }
     }
-    String value = this.input.substring(this.index, this.index + utfStrLen);
-    String endString = this.input.substring(this.index + utfStrLen, this.index
+    String value = input.substring(index, index + utfStrLen);
+    if ((index + utfStrLen + 2) > inputLength
+        || (index + utfStrLen) > inputLength)
+    {
+      throw new SerializedPhpParserException(
+          "Unexpected serialized string length!", index);
+    }
+    String endString = input.substring(index + utfStrLen, index
         + utfStrLen + 2);
     if (!endString.equals("\";"))
     {
       throw new SerializedPhpParserException(
-          "Unexpected serialized string length!", this.index);
+          "Unexpected serialized string length!", index);
     }
-    this.index = this.index + utfStrLen + 2;
+    index = index + utfStrLen + 2;
     return value;
   }
 
   private Boolean parseBoolean() throws SerializedPhpParserException
   {
-    int delimiter = this.input.indexOf(';', this.index);
+    int delimiter = input.indexOf(';', index);
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized boolean!", this.index);
+          "Unexpected end of serialized boolean!", index);
     }
     checkUnexpectedLength(delimiter + 1);
-    String value = this.input.substring(this.index, delimiter);
+    String value = input.substring(index, delimiter);
     if (value.equals("1"))
     {
       value = "true";
@@ -254,35 +260,35 @@ public class SerializedPhpParser
     {
       value = "false";
     }
-    this.index = delimiter + 1;
+    index = delimiter + 1;
     return Boolean.valueOf(value);
   }
 
   private Double parseFloat() throws SerializedPhpParserException
   {
-    int delimiter = this.input.indexOf(';', this.index);
+    int delimiter = input.indexOf(';', index);
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized float!", this.index);
+          "Unexpected end of serialized float!", index);
     }
     checkUnexpectedLength(delimiter + 1);
-    String value = this.input.substring(this.index, delimiter);
-    this.index = delimiter + 1;
+    String value = input.substring(index, delimiter);
+    index = delimiter + 1;
     return Double.valueOf(value);
   }
 
   private Long parseInt() throws SerializedPhpParserException
   {
-    int delimiter = this.input.indexOf(';', this.index);
+    int delimiter = input.indexOf(';', index);
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized integer!", this.index);
+          "Unexpected end of serialized integer!", index);
     }
     checkUnexpectedLength(delimiter + 1);
-    String value = this.input.substring(this.index, delimiter);
-    this.index = delimiter + 1;
+    String value = input.substring(index, delimiter);
+    index = delimiter + 1;
     return Long.valueOf(value);
   }
 
@@ -313,17 +319,17 @@ public class SerializedPhpParser
     @Override
     public String toString()
     {
-      return "\"" + this.name + "\" : " + this.attributes.toString();
+      return "\"" + name + "\" : " + attributes.toString();
     }
   }
 
   private void checkUnexpectedLength(int newIndex)
       throws SerializedPhpParserException
   {
-    if (this.index > this.inputLength || newIndex > this.inputLength)
+    if (index > inputLength || newIndex > inputLength)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized Input!", this.index);
+          "Unexpected end of serialized Input!", index);
     }
   }
 
