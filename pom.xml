@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.lorecraft.phparser</groupId>
   <artifactId>serialized-php-parser</artifactId>
-  <version>0.4.2</version>
+  <version>0.4.3</version>
   <packaging>jar</packaging>
   <description>Serialized PHP Parser project</description>
   
