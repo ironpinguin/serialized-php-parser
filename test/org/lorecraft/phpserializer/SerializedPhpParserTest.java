@@ -63,7 +63,7 @@ public class SerializedPhpParserTest extends TestCase
   @SuppressWarnings("rawtypes")
   public void testParseComplexDataStructure() throws Exception
   {
-    String input = "a:2:{i:0;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";ÎÑTËRÑÅTÌÔñÁL\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}i:1;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";ÎÑTËRÑÅTÌÔñÁL\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}}";
+    String input = "a:2:{i:0;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";ï¿½ï¿½Tï¿½Rï¿½ï¿½Tï¿½ï¿½ï¿½ï¿½L\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}i:1;a:8:{s:5:\"class\";O:7:\"MyClass\":1:{s:5:\"pippo\";s:4:\"test\";}i:0;i:1;i:1;d:0.19999998807907104;i:2;b:1;i:3;b:0;i:4;N;i:5;a:1:{i:0;s:42:\"\";\";\";\";\";ï¿½ï¿½Tï¿½Rï¿½ï¿½Tï¿½ï¿½ï¿½ï¿½L\";\";\";\";\";\";}i:6;O:6:\"Object\":0:{}}}";
     new SerializedPhpParser(input).parse();
 
     // sample output of a yahoo web image search api call
@@ -104,7 +104,7 @@ public class SerializedPhpParserTest extends TestCase
         + "s:32:\"top_story_promo_transition.thumb\";s:4:\"type\";s:3:\"png\";s:5:\"width\";i:150;s:6:\"height\";"
         + "i:50;s:11:\"resizedName\";N;s:7:\"thumb_x\";N;s:7:\"thumb_y\";N;s:11:\"thumb_width\";"
         + "N;s:12:\"thumb_height\";N;s:9:\"raw_width\";i:150;s:10:\"raw_height\";i:50;s:7:\"version\";i:37;}s:7:\"preview\";"
-        + "N;s:7:\"caption\";s:6:\"supérb\";s:6:\"hidden\";N;s:9:\"highlight\";b:1;s:14:\"highlightImage\";O:5:\"image\":12:{s:4:\"name\";"
+        + "N;s:7:\"caption\";s:6:\"supï¿½rb\";s:6:\"hidden\";N;s:9:\"highlight\";b:1;s:14:\"highlightImage\";O:5:\"image\":12:{s:4:\"name\";"
         + "s:36:\"top_story_promo_transition.highlight\";s:4:\"type\";s:3:\"png\";s:5:\"width\";i:150;s:6:\"height\";i:50;"
         + "s:11:\"resizedName\";N;s:7:\"thumb_x\";N;s:7:\"thumb_y\";N;s:11:\"thumb_width\";N;s:12:\"thumb_height\";N;s:9:\"raw_width\";"
         + "i:150;s:10:\"raw_height\";i:50;s:7:\"version\";i:37;}s:11:\"isAlbumName\";N;s:6:\"clicks\";N;s:8:\"keywords\";s:0:\"\";"
@@ -112,7 +112,7 @@ public class SerializedPhpParserTest extends TestCase
         + "s:20:\"1156837966_352721747\";s:11:\"extraFields\";a:1:{s:11:\"Description\";s:0:\"\";}s:4:\"rank\";N;s:7:\"version\";i:37;s:7:\"emailMe\";N;}}";
     @SuppressWarnings("rawtypes")
     Map results = (Map) new SerializedPhpParser(input, false).parse();
-    assertTrue(results.toString().indexOf("supérb") > 0);
+    assertTrue(results.toString().indexOf("supï¿½rb") > 0);
   }
 
   @SuppressWarnings("rawtypes")
@@ -215,6 +215,22 @@ public class SerializedPhpParserTest extends TestCase
   public void testBugDefectStringWithSpezialChar()
   {
     String input = "s:4:\"";
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input);
+  }
+
+  public void testBug2DefectStringWithSpezialChar()
+  {
+    // Wrong Length and not correct ended.
+    String input = "s:2:\"Def";
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input);
+    // Right length, but missing "; at the end of serialized String
+    input = "s:3:\"Def";
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input);
+    // Right length, but missing ; at the end of serialized String
+    input = "s:3:\"Def\"";
     assertExceptionSimple(
         "org.lorecraft.phparser.SerializedPhpParserException", input);
   }
