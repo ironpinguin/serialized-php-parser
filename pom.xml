@@ -5,9 +5,9 @@
   <version>0.4.3</version>
   <packaging>jar</packaging>
   <description>Serialized PHP Parser project</description>
-  
+
   <properties>
-    <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
+    <project.build.sourceEncoding>utf8</project.build.sourceEncoding>
   </properties>
   
   <dependencies>
