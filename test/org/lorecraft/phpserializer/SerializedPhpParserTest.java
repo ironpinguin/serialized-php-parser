@@ -237,7 +237,9 @@ public class SerializedPhpParserTest extends TestCase
 
   public void testBugStringWithSpezialChar() throws Exception
   {
-    assertPrimitive("s:4:\"" + '\000' + "\";", "" + '\000');
+    String input = "s:4:\"" + '\000' + "\";";
+    String expected = "" + '\000';
+    assertPrimitive(input, expected);
   }
 
   private void assertExceptionSimple(String expectException, String input)
