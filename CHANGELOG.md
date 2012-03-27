@@ -2,6 +2,7 @@ serialized-php-parser 0.4.4
 ---------------------------
 
  * Fix Bug Strings with 0 byte chars can't be interpreted.
+ * Add deserializing of References 'R'.
 
 serialized-php-parser 0.4.3
 ---------------------------

@@ -89,11 +89,6 @@ public class SerializedPhpParserTest extends TestCase
         ((Map) ((Map) results.get("ResultSet")).get("Result")).size());
   }
 
-  private void assertPrimitive(String input, Object expected) throws Exception
-  {
-    assertEquals(expected, new SerializedPhpParser(input).parse());
-  }
-
   public void testParseStructureWithSpecialChars() throws Exception
   {
     String input = "a:1:{i:0;O:9:\"albumitem\":19:{s:5:\"image\";O:5:\"image\":12:{s:4:\"name\";"
@@ -242,6 +237,24 @@ public class SerializedPhpParserTest extends TestCase
     assertPrimitive(input, expected);
   }
 
+  @SuppressWarnings("rawtypes")
+  public void testBugReference() throws Exception
+  {
+    String input = "a:4:{s:2:\"t1\";s:6:\"Friend\";i:2;i:10;i:3;R:2;i:4;R:3;}";
+    SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input);
+    Object result = serializedPhpParser.parse();
+    assertEquals("Friend", ((Map) result).get("t1"));
+    assertEquals(((Map) result).get("t1"), ((Map) result).get(3L));
+    assertEquals(((Map) result).get(2L), ((Map) result).get(4L));
+  }
+
+  public void testBugReferenceOutOfRange() throws Exception
+  {
+    String input = "a:4:{s:2:\"t1\";s:6:\"Friend\";i:2;i:10;i:3;R:2;i:4;R:5;}";
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input);
+  }
+
   private void assertExceptionSimple(String expectException, String input)
   {
     try
@@ -253,6 +266,11 @@ public class SerializedPhpParserTest extends TestCase
     {
       assertEquals(expectException, ex.getClass().getName());
     }
+  }
+
+  private void assertPrimitive(String input, Object expected) throws Exception
+  {
+    assertEquals(expected, new SerializedPhpParser(input).parse());
   }
 
 }

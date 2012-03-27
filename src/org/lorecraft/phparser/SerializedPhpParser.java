@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package org.lorecraft.phparser;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -55,6 +56,9 @@ public class SerializedPhpParser
 
   private boolean assumeUTF8 = true;
 
+  private final WeakReference<ArrayList<Object>> refArray = new WeakReference<ArrayList<Object>>(
+      new ArrayList<Object>());
+
   private Pattern acceptedAttributeNameRegex = null;
 
   public SerializedPhpParser(String input)
@@ -72,22 +76,35 @@ public class SerializedPhpParser
 
   public Object parse() throws SerializedPhpParserException
   {
+    Object result = this.parseInternal(false);
+    this.cleanup();
+    return result;
+  }
+
+  private void cleanup()
+  {
+    this.refArray.get().clear();
+  }
+
+  private Object parseInternal(boolean isKey)
+      throws SerializedPhpParserException
+  {
     checkUnexpectedLength(this.index + 2);
     char type = this.input.charAt(this.index);
     switch (type)
     {
     case 'i':
       this.index += 2;
-      return parseInt();
+      return parseInt(isKey);
     case 'd':
       this.index += 2;
-      return parseFloat();
+      return parseFloat(isKey);
     case 'b':
       this.index += 2;
       return parseBoolean();
     case 's':
       this.index += 2;
-      return parseString();
+      return parseString(isKey);
     case 'a':
       this.index += 2;
       return parseArray();
@@ -97,15 +114,41 @@ public class SerializedPhpParser
     case 'N':
       this.index += 2;
       return NULL;
+    case 'R':
+      this.index += 2;
+      return parseReference();
     default:
       throw new SerializedPhpParserException("Encountered unknown type ["
           + type + "]");
     }
   }
 
+  private Object parseReference() throws SerializedPhpParserException
+  {
+    int delimiter = this.input.indexOf(';', this.index);
+    if (delimiter == -1)
+    {
+      throw new SerializedPhpParserException(
+          "Unexpected end of serialized Reference!", this.index);
+    }
+    checkUnexpectedLength(delimiter + 1);
+    Integer refIndex = Integer.valueOf(this.input.substring(this.index,
+        delimiter)) - 1;
+    this.index = delimiter + 1;
+    if ((refIndex + 1) > this.refArray.get().size())
+    {
+      throw new SerializedPhpParserException("Out of range reference index: "
+          + (refIndex + 1) + " !", this.index);
+    }
+    Object value = this.refArray.get().get(refIndex);
+    this.refArray.get().add(value);
+    return value;
+  }
+
   private Object parseObject() throws SerializedPhpParserException
   {
     PhpObject phpObject = new PhpObject();
+    this.refArray.get().add(phpObject);
     int strLen = readLength();
     checkUnexpectedLength(strLen);
     phpObject.name = this.input.substring(this.index, this.index + strLen);
@@ -113,8 +156,8 @@ public class SerializedPhpParser
     int attrLen = readLength();
     for (int i = 0; i < attrLen; i++)
     {
-      Object key = parse();
-      Object value = parse();
+      Object key = parseInternal(true);
+      Object value = parseInternal(false);
       if (isAcceptedAttribute(key))
       {
         phpObject.attributes.put(key, value);
@@ -129,10 +172,11 @@ public class SerializedPhpParser
     int arrayLen = readLength();
     checkUnexpectedLength(arrayLen);
     Map<Object, Object> result = new LinkedHashMap<Object, Object>();
+    this.refArray.get().add(result);
     for (int i = 0; i < arrayLen; i++)
     {
-      Object key = parse();
-      Object value = parse();
+      Object key = parseInternal(true);
+      Object value = parseInternal(false);
       if (isAcceptedAttribute(key))
       {
         result.put(key, value);
@@ -182,7 +226,7 @@ public class SerializedPhpParser
    *
    * @return
    */
-  private String parseString() throws SerializedPhpParserException
+  private String parseString(boolean isKey) throws SerializedPhpParserException
   {
     int strLen = readLength();
     checkUnexpectedLength(strLen);
@@ -237,6 +281,10 @@ public class SerializedPhpParser
           "Unexpected serialized string length!", this.index);
     }
     this.index = this.index + utfStrLen + 2;
+    if (!isKey)
+    {
+      this.refArray.get().add(value);
+    }
     return value;
   }
 
@@ -259,10 +307,11 @@ public class SerializedPhpParser
       value = "false";
     }
     this.index = delimiter + 1;
+    this.refArray.get().add(Boolean.valueOf(value));
     return Boolean.valueOf(value);
   }
 
-  private Double parseFloat() throws SerializedPhpParserException
+  private Double parseFloat(boolean isKey) throws SerializedPhpParserException
   {
     int delimiter = this.input.indexOf(';', this.index);
     if (delimiter == -1)
@@ -273,10 +322,14 @@ public class SerializedPhpParser
     checkUnexpectedLength(delimiter + 1);
     String value = this.input.substring(this.index, delimiter);
     this.index = delimiter + 1;
+    if (!isKey)
+    {
+      this.refArray.get().add(Double.valueOf(value));
+    }
     return Double.valueOf(value);
   }
 
-  private Long parseInt() throws SerializedPhpParserException
+  private Long parseInt(boolean isKey) throws SerializedPhpParserException
   {
     int delimiter = this.input.indexOf(';', this.index);
     if (delimiter == -1)
@@ -287,6 +340,10 @@ public class SerializedPhpParser
     checkUnexpectedLength(delimiter + 1);
     String value = this.input.substring(this.index, delimiter);
     this.index = delimiter + 1;
+    if (!isKey)
+    {
+      this.refArray.get().add(Long.valueOf(value));
+    }
     return Long.valueOf(value);
   }
 
