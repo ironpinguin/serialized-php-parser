@@ -23,7 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package org.lorecraft.phparser;
 
-import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -56,8 +55,7 @@ public class SerializedPhpParser
 
   private boolean assumeUTF8 = true;
 
-  private final WeakReference<ArrayList<Object>> refArray = new WeakReference<ArrayList<Object>>(
-      new ArrayList<Object>());
+  private final ArrayList<Object> refArray = new ArrayList<Object>();
 
   private Pattern acceptedAttributeNameRegex = null;
 
@@ -83,7 +81,7 @@ public class SerializedPhpParser
 
   private void cleanup()
   {
-    this.refArray.get().clear();
+    this.refArray.clear();
   }
 
   private Object parseInternal(boolean isKey)
@@ -135,20 +133,20 @@ public class SerializedPhpParser
     Integer refIndex = Integer.valueOf(this.input.substring(this.index,
         delimiter)) - 1;
     this.index = delimiter + 1;
-    if ((refIndex + 1) > this.refArray.get().size())
+    if ((refIndex + 1) > this.refArray.size())
     {
       throw new SerializedPhpParserException("Out of range reference index: "
           + (refIndex + 1) + " !", this.index);
     }
-    Object value = this.refArray.get().get(refIndex);
-    this.refArray.get().add(value);
+    Object value = this.refArray.get(refIndex);
+    this.refArray.add(value);
     return value;
   }
 
   private Object parseObject() throws SerializedPhpParserException
   {
     PhpObject phpObject = new PhpObject();
-    this.refArray.get().add(phpObject);
+    this.refArray.add(phpObject);
     int strLen = readLength();
     checkUnexpectedLength(strLen);
     phpObject.name = this.input.substring(this.index, this.index + strLen);
@@ -172,7 +170,7 @@ public class SerializedPhpParser
     int arrayLen = readLength();
     checkUnexpectedLength(arrayLen);
     Map<Object, Object> result = new LinkedHashMap<Object, Object>();
-    this.refArray.get().add(result);
+    this.refArray.add(result);
     for (int i = 0; i < arrayLen; i++)
     {
       Object key = parseInternal(true);
@@ -283,7 +281,7 @@ public class SerializedPhpParser
     this.index = this.index + utfStrLen + 2;
     if (!isKey)
     {
-      this.refArray.get().add(value);
+      this.refArray.add(value);
     }
     return value;
   }
@@ -307,7 +305,7 @@ public class SerializedPhpParser
       value = "false";
     }
     this.index = delimiter + 1;
-    this.refArray.get().add(Boolean.valueOf(value));
+    this.refArray.add(Boolean.valueOf(value));
     return Boolean.valueOf(value);
   }
 
@@ -324,7 +322,7 @@ public class SerializedPhpParser
     this.index = delimiter + 1;
     if (!isKey)
     {
-      this.refArray.get().add(Double.valueOf(value));
+      this.refArray.add(Double.valueOf(value));
     }
     return Double.valueOf(value);
   }
@@ -342,7 +340,7 @@ public class SerializedPhpParser
     this.index = delimiter + 1;
     if (!isKey)
     {
-      this.refArray.get().add(Long.valueOf(value));
+      this.refArray.add(Long.valueOf(value));
     }
     return Long.valueOf(value);
   }
