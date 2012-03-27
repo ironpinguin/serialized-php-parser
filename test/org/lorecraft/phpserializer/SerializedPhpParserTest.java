@@ -235,6 +235,11 @@ public class SerializedPhpParserTest extends TestCase
         "org.lorecraft.phparser.SerializedPhpParserException", input);
   }
 
+  public void testBugStringWithSpezialChar() throws Exception
+  {
+    assertPrimitive("s:4:\"" + '\000' + "\";", "" + '\000');
+  }
+
   private void assertExceptionSimple(String expectException, String input)
   {
     try
