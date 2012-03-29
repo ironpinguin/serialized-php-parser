@@ -1,9 +1,13 @@
+serialized-php-parser 0.4.5
+---------------------------
+
+ * Add exceptions integer codes to interpret better the exceptions reasons.
+
 serialized-php-parser 0.4.4
 ---------------------------
 
  * Fix Bug Strings with 0 byte chars can't be interpreted.
  * Add deserializing of References 'R'.
- * Add exceptions integer codes to interpret better the exceptions reasons.
 
 serialized-php-parser 0.4.3
 ---------------------------
