@@ -8,6 +8,7 @@ public class SerializedPhpParserException extends Exception
    */
   private static final long serialVersionUID = 2L;
 
+  public static final int NO_CODE_SET = 0;
   /**
    * code if serialized String is to Long (example s:5;"Hello Next"; )
    */
@@ -60,7 +61,7 @@ public class SerializedPhpParserException extends Exception
   /**
    *
    */
-  public int code = 0;
+  public int code = NO_CODE_SET;
 
   /**
    *
