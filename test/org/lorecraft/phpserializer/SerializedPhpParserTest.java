@@ -4,7 +4,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.lorecraft.phparser.SerializedPhpParser;
+import org.lorecraft.phparser.*;
 
 public class SerializedPhpParserTest extends TestCase
 {
@@ -253,6 +253,40 @@ public class SerializedPhpParserTest extends TestCase
     String input = "a:4:{s:2:\"t1\";s:6:\"Friend\";i:2;i:10;i:3;R:2;i:4;R:5;}";
     assertExceptionSimple(
         "org.lorecraft.phparser.SerializedPhpParserException", input);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testWrongEncodingInputString() throws Exception
+  {
+    // ISO-8859-1 String: HäöüÖÜÄ
+    String expected = "H" + '\344' + '\366' + '\374' + '\326' + '\334' + '\304';
+    String input = "a:1:{s:3:\"Dat\";s:7:\"" + expected + "\";}";
+
+    assertExceptionSimple(
+        "org.lorecraft.phparser.SerializedPhpParserException", input,
+        SerializedPhpParserException.TO_SHORT_STRING);
+
+    SerializedPhpParser serializedPhpParser = new SerializedPhpParser(input,
+        false);
+    Object result = serializedPhpParser.parse();
+    assertEquals(expected, ((Map<String, String>) result).get("Dat"));
+  }
+
+  private void assertExceptionSimple(String expectException, String input, int code)
+  {
+    try
+    {
+      Object result = new SerializedPhpParser(input).parse();
+      fail("Expect a Exception! " + result.toString());
+    }
+    catch (Exception ex)
+    {
+      assertEquals(expectException, ex.getClass().getName());
+      if (ex instanceof SerializedPhpParserException)
+      {
+        assertEquals(code, ((SerializedPhpParserException) ex).code);
+      }
+    }
   }
 
   private void assertExceptionSimple(String expectException, String input)

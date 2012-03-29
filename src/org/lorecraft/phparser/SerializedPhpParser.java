@@ -117,7 +117,7 @@ public class SerializedPhpParser
       return parseReference();
     default:
       throw new SerializedPhpParserException("Encountered unknown type ["
-          + type + "]");
+          + type + "]", this.index, SerializedPhpParserException.UNKNOWN_TYPE);
     }
   }
 
@@ -127,7 +127,8 @@ public class SerializedPhpParser
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized Reference!", this.index);
+          "Unexpected end of serialized Reference!", this.index,
+          SerializedPhpParserException.MISSING_DELIMITER_STRING);
     }
     checkUnexpectedLength(delimiter + 1);
     Integer refIndex = Integer.valueOf(this.input.substring(this.index,
@@ -136,7 +137,8 @@ public class SerializedPhpParser
     if ((refIndex + 1) > this.refArray.size())
     {
       throw new SerializedPhpParserException("Out of range reference index: "
-          + (refIndex + 1) + " !", this.index);
+          + (refIndex + 1) + " !", this.index,
+          SerializedPhpParserException.OUT_OF_RANG_REFERENCE);
     }
     Object value = this.refArray.get(refIndex);
     this.refArray.add(value);
@@ -184,7 +186,8 @@ public class SerializedPhpParser
     if (endChar != '}')
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized Array, missing }!", this.index);
+          "Unexpected end of serialized Array, missing }!", this.index,
+          SerializedPhpParserException.MISSING_CLOSER_STRING);
     }
 
     this.index++;
@@ -211,7 +214,7 @@ public class SerializedPhpParser
     {
       throw new SerializedPhpParserException(
           "Missing delimiter after string, array or object length field!",
-          this.index);
+          this.index, SerializedPhpParserException.MISSING_DELIMITER_STRING);
     }
     checkUnexpectedLength(delimiter + 2);
     int arrayLen = Integer.valueOf(this.input.substring(this.index, delimiter));
@@ -241,7 +244,8 @@ public class SerializedPhpParser
             + strLen + ") at position " + (nextCharIndex - this.index)
             + ", absolut position in Input String: " + nextCharIndex
             + ". The string: "
-            + this.input.substring(this.index, nextCharIndex), nextCharIndex);
+            + this.input.substring(this.index, nextCharIndex), nextCharIndex,
+            SerializedPhpParserException.TO_LONG_STRING);
       }
       char ch = this.input.charAt(nextCharIndex);
       if (this.assumeUTF8)
@@ -269,14 +273,16 @@ public class SerializedPhpParser
         || (this.index + utfStrLen) > this.inputLength)
     {
       throw new SerializedPhpParserException(
-          "Unexpected serialized string length!", this.index);
+          "Unexpected serialized string length!", this.index,
+          SerializedPhpParserException.TO_LONG_STRING);
     }
     String endString = this.input.substring(this.index + utfStrLen, this.index
         + utfStrLen + 2);
     if (!endString.equals("\";"))
     {
       throw new SerializedPhpParserException(
-          "Unexpected serialized string length!", this.index);
+          "Unexpected serialized string length!", this.index,
+          SerializedPhpParserException.TO_SHORT_STRING);
     }
     this.index = this.index + utfStrLen + 2;
     if (!isKey)
@@ -315,7 +321,8 @@ public class SerializedPhpParser
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized float!", this.index);
+          "Unexpected end of serialized float!", this.index,
+          SerializedPhpParserException.MISSING_DELIMITER_STRING);
     }
     checkUnexpectedLength(delimiter + 1);
     String value = this.input.substring(this.index, delimiter);
@@ -333,7 +340,8 @@ public class SerializedPhpParser
     if (delimiter == -1)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized integer!", this.index);
+          "Unexpected end of serialized integer!", this.index,
+          SerializedPhpParserException.MISSING_DELIMITER_STRING);
     }
     checkUnexpectedLength(delimiter + 1);
     String value = this.input.substring(this.index, delimiter);
@@ -382,7 +390,8 @@ public class SerializedPhpParser
     if (this.index > this.inputLength || newIndex > this.inputLength)
     {
       throw new SerializedPhpParserException(
-          "Unexpected end of serialized Input!", this.index);
+          "Unexpected end of serialized Input!", this.index,
+          SerializedPhpParserException.TO_SHORT_INPUT_STRING);
     }
   }
 
